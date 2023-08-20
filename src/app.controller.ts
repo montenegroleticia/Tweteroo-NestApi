@@ -6,12 +6,12 @@ import {
   HttpException,
   HttpStatus,
   Param,
+  ParseIntPipe,
   Post,
+  Query,
 } from '@nestjs/common';
 import { AppService } from './app.service';
-import { CreateTweetDto } from './dtos/tweet.dto';
 import { CreateUserDto } from './dtos/user.dto';
-import { User } from './entities/user.entity';
 
 @Controller()
 export class AppController {
@@ -23,11 +23,18 @@ export class AppController {
   }
 
   @Get('/tweets')
-  getTweets() {
+  getTweets(@Query('page', ParseIntPipe) page: number) {
     try {
-      return this.appService.getTweets();
+      if (page < 1) {
+        throw new HttpException(
+          'Informe uma página válida!',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+      const tweets = this.appService.getTweets(page);
+      return tweets;
     } catch (error) {
-      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(error, HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -36,7 +43,7 @@ export class AppController {
     try {
       return this.appService.getTweetsByUser(username);
     } catch (error) {
-      throw new HttpException('Username not found', HttpStatus.NOT_FOUND);
+      throw new HttpException('', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -46,7 +53,7 @@ export class AppController {
       const username = body.username;
       const tweet = body.tweet;
 
-      const findUser = this.appService.getTweetsByUser(username);
+      const findUser = this.appService.findUser(username);
       if (!findUser) {
         throw new HttpException('', HttpStatus.UNAUTHORIZED);
       }

@@ -1,7 +1,6 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { User } from './entities/user.entity';
 import { Tweet } from './entities/tweet.entity';
-import { CreateTweetDto } from './dtos/tweet.dto';
 import { CreateUserDto } from './dtos/user.dto';
 
 @Injectable()
@@ -23,17 +22,48 @@ export class AppService {
     return "I'm okay!";
   }
 
-  getTweets() {
-    return this.tweets;
+  getTweets(page: number) {
+    const pageSize = 15;
+
+    const startIndex = page ? (page - 1) * pageSize : 0;
+    const endIndex = startIndex + pageSize;
+
+    const tweetPage = this.tweets
+      .slice(startIndex, endIndex)
+      .reverse()
+      .map((tweet) => ({
+        username: tweet.getUser().getUsername(),
+        avatar: tweet.getUser().getAvatar(),
+        tweet: tweet.getTweet(),
+      }));
+
+    return tweetPage;
   }
 
   getTweetsByUser(username: string) {
+    const tweetsByUser = this.tweets
+      .filter((tweet) => tweet.getUser().getUsername() === username)
+      .map((tweet) => ({
+        username: tweet.getUser().getUsername(),
+        avatar: tweet.getUser().getAvatar(),
+        tweet: tweet.getTweet(),
+      }));
+
+    if (tweetsByUser) {
+      return tweetsByUser;
+    } else {
+      return [];
+    }
+  }
+
+  findUser(username: string) {
     return this.user.find((user) => user.getUsername() === username);
   }
 
   postTweets(username: string, tweet: string) {
     const findUser = this.user.find((user) => user.getUsername() === username);
     const newTweet = new Tweet(findUser, tweet);
+
     return this.tweets.push(newTweet);
   }
 
