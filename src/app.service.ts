@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { User } from './entities/user.entity';
 import { Tweet } from './entities/tweet.entity';
 import { CreateTweetDto } from './dtos/tweet.dto';
@@ -19,17 +19,22 @@ export class AppService {
     this.tweets = [];
   }
 
+  getHealth() {
+    return "I'm okay!";
+  }
+
   getTweets() {
     return this.tweets;
   }
 
   getTweetsByUser(username: string) {
-    return 'work!';
+    return this.user.find((user) => user.getUsername() === username);
   }
 
-  postTweets(body: CreateTweetDto) {
-    const tweet = new Tweet(body.user, body.tweet);
-    return this.tweets.push(tweet);
+  postTweets(username: string, tweet: string) {
+    const findUser = this.user.find((user) => user.getUsername() === username);
+    const newTweet = new Tweet(findUser, tweet);
+    return this.tweets.push(newTweet);
   }
 
   signUp(body: CreateUserDto) {
