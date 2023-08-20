@@ -6,7 +6,6 @@ import {
   HttpException,
   HttpStatus,
   Param,
-  ParseIntPipe,
   Post,
   Query,
 } from '@nestjs/common';
@@ -23,7 +22,7 @@ export class AppController {
   }
 
   @Get('/tweets')
-  getTweets(@Query('page', ParseIntPipe) page: number) {
+  getTweets(@Query('page') page: number) {
     try {
       if (page < 1) {
         throw new HttpException(
