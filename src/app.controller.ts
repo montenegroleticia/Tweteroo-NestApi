@@ -1,27 +1,53 @@
-import { Controller, Get, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpException,
+  HttpStatus,
+  Param,
+  Post,
+} from '@nestjs/common';
 import { AppService } from './app.service';
+import { CreateTweetDto } from './dtos/tweet.dto';
+import { CreateUserDto } from './dtos/user.dto';
 
 @Controller()
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
   @Get('/tweets')
-  getTweets(): string {
-    return this.appService.getTweets();
+  getTweets() {
+    try {
+      return this.appService.getTweets();
+    } catch (error) {
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 
   @Get('/tweets/:username')
-  getTweetsByUser(): string {
-    return this.appService.getTweetsByUser();
+  getTweetsByUser(@Param('username') usename: string) {
+    try {
+      return this.appService.getTweetsByUser(usename);
+    } catch (error) {
+      throw new HttpException('Username not found', HttpStatus.NOT_FOUND);
+    }
   }
 
   @Post('/tweets')
-  postTweets(): string {
-    return this.appService.postTweets();
+  postTweets(@Body() body: CreateTweetDto) {
+    try {
+      return this.appService.postTweets(body);
+    } catch (error) {
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 
   @Post('/sign-up')
-  signUp(): string {
-    return this.appService.signUp();
+  signUp(@Body() body: CreateUserDto) {
+    try {
+      return this.appService.signUp(body);
+    } catch (error) {
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 }
